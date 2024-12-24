@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import streamlit as st
+st.set_page_config(layout="wide")
 
 
 # Function to scrape user name and research titles from Google Scholar
