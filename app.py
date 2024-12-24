@@ -20,14 +20,15 @@ def scrape_scholar_details(scholar_url):
     user_name = soup.find("div", id="gsc_prf_in")
     user_name = user_name.text if user_name else "Unknown User"
 
-    # Extract research titles
+   # Extract research titles
     titles = []
-    for item in soup.find_all("h3", class_="gs_rt"):
-        title = item.text
-        titles.append(title)
-
+    for row in soup.find_all("tr", class_="gsc_a_tr"):
+        title_cell = row.find("td", class_="gsc_a_t")
+        if title_cell:
+            title = title_cell.find("a").text  # The title text is inside the <a> tag
+            titles.append(title)
+    
     return {"name": user_name, "titles": titles}
-
 
 # Streamlit app to process the file
 def main():
