@@ -54,7 +54,7 @@ def main():
             # Iterate over each Google Scholar link
             for index, row in df.iterrows():
                 scholar_url = row[column_name]
-                st.write(f"Scraping: {scholar_url}")
+                #st.write(f"Scraping: {scholar_url}")
                 try:
                     details = scrape_scholar_details(scholar_url)
                     results.append({
