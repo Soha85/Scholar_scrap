@@ -27,8 +27,8 @@ def scrape_scholar_details(scholar_url):
         if title_cell:
             title = title_cell.find("a").text  # The title text is inside the <a> tag
             titles.append(title)
-        citation_cell = row .find("td",class_="gsc_a_c")
-        if citation:
+        citation_cell = row.find("td",class_="gsc_a_c")
+        if citation_cell:
             citation = citation_cell.find("a").text
             citations.append(citation)
     
