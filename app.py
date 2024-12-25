@@ -64,7 +64,7 @@ def main():
                     results.append({
                         "User Name": details["name"],
                         "Research Titles": "\n".join(details["titles"]),
-                        "Citations":"\n".join(details["citation"])
+                        "Citations":"\n".join(details["citations"])
                     })
                 except Exception as e:
                     results.append({
