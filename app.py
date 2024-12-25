@@ -21,14 +21,17 @@ def scrape_scholar_details(scholar_url):
     user_name = user_name.text if user_name else "Unknown User"
 
    # Extract research titles
-    titles = []
+    titles,citations = [],[]
     for row in soup.find_all("tr", class_="gsc_a_tr"):
         title_cell = row.find("td", class_="gsc_a_t")
         if title_cell:
             title = title_cell.find("a").text  # The title text is inside the <a> tag
             titles.append(title)
+        citation = row .find("td",class_="gsc_a_c")
+        if citation:
+            citations.append(citation)
     
-    return {"name": user_name, "titles": titles}
+    return {"name": user_name, "titles": titles,"citations":citations}
 
 # Streamlit app to process the file
 def main():
@@ -59,7 +62,8 @@ def main():
                     details = scrape_scholar_details(scholar_url)
                     results.append({
                         "User Name": details["name"],
-                        "Research Titles": "\n".join(details["titles"])
+                        "Research Titles": "\n".join(details["titles"]),
+                        "Citations":"\n".join(details["citation"])
                     })
                 except Exception as e:
                     results.append({
