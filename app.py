@@ -27,11 +27,11 @@ def scrape_scholar_details(scholar_url):
         if title_cell:
             title = title_cell.find("a").text  # The title text is inside the <a> tag
             titles.append(title)
-        citation_cell = title_cell.find("div",class_="gs_gray")
-        if citation_cell:
-            # Extract only the text outside <span>
-            citation = citation_cell.get_text(strip=True)
-            #citation = citation_cell.find('div').text
+       # Extract all citation details
+        citation_cells = title_cell.find_all("div", class_="gs_gray")
+        if citation_cells:
+            # Combine text from all <div> elements, including <span>
+            citation = " | ".join([cell.get_text(strip=True) for cell in citation_cells])
             citations.append(citation)
     return {"name": user_name, "titles": titles,"citations":citations}
 
