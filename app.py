@@ -29,8 +29,12 @@ def scrape_scholar_details(scholar_url):
             titles.append(title)
         citation_cell = row.find("td",class_="gs_gray")
         if citation_cell:
-            citation = citation_cell.find('div').text
-            citations.append(citation)
+            div = citation_cell.find('div')
+            if div:
+                # Extract only the text outside <span>
+                citation = div.get_text(strip=True)
+                #citation = citation_cell.find('div').text
+                citations.append(citation)
     
     return {"name": user_name, "titles": titles,"citations":citations}
 
