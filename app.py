@@ -20,8 +20,12 @@ def scrape_scholar_details(scholar_url):
     user_name = soup.find("div", id="gsc_prf_in")
     user_name = user_name.text if user_name else "Unknown User"
 
+     # Extract the user's title
+    user_title = soup.find("div", class_="gsc_prf_il")
+    user_title = user_title.text if user_title else "Unknown Title"
+    
    # Extract research titles
-    titles,citations = [],[]
+    titles,citations,bibtex_entries = [],[],[]
     for row in soup.find_all("tr", class_="gsc_a_tr"):
         title_cell = row.find("td", class_="gsc_a_t")
         if title_cell:
@@ -33,7 +37,15 @@ def scrape_scholar_details(scholar_url):
             # Combine text from all <div> elements, including <span>
             citation = " | ".join([cell.get_text(strip=True) for cell in citation_cells])
             citations.append(citation)
-    return {"name": user_name, "titles": titles,"citations":citations}
+        # Extract BibTeX link
+            citation_link = row.find("a", class_="gsc_a_at")["href"]
+            bibtex_url = f"https://scholar.google.com{citation_link}"
+            bibtex_response = requests.get(bibtex_url, headers=headers)
+            if bibtex_response.status_code == 200:
+                bibtex_entries.append(bibtex_response.text)
+            else:
+                bibtex_entries.append("BibTeX not available")
+    return {"name": user_name,"title":user_title, "researches": titles,"citations":citations,"Bibtex":bibtex_entries}
 
 # Streamlit app to process the file
 def main():
@@ -64,8 +76,10 @@ def main():
                     details = scrape_scholar_details(scholar_url)
                     results.append({
                         "User Name": details["name"],
-                        "Research Titles": "\n".join(details["titles"]),
-                        "Citations":"\n".join(details["citations"])
+                        "User Title":details["title"],
+                        "Research Titles": "\n".join(details["researches"]),
+                        "Citations":"\n".join(details["citations"]),
+                        "BibTex":"\n".join(details["Bibtex"])
                     })
                 except Exception as e:
                     results.append({
