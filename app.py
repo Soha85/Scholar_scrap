@@ -37,14 +37,22 @@ def scrape_scholar_details(scholar_url):
             # Combine text from all <div> elements, including <span>
             citation = " | ".join([cell.get_text(strip=True) for cell in citation_cells])
             citations.append(citation)
-        # Extract BibTeX link
-            citation_link = row.find("a", class_="gsc_a_at")["href"]
-            bibtex_url = f"https://scholar.google.com{citation_link}"
-            bibtex_response = requests.get(bibtex_url, headers=headers)
-            if bibtex_response.status_code == 200:
-                bibtex_entries.append(bibtex_response.text)
-            else:
-                bibtex_entries.append("BibTeX not available")
+       # Extract BibTeX link
+        bibtex_anchor = row.find("a", class_="gsc_a_at")["href"]
+        bibtex_url = f"https://scholar.google.com{bibtex_anchor}&output=cite&scirp=0"
+        bibtex_response = requests.get(bibtex_url, headers=headers)
+        if bibtex_response.status_code == 200:
+             # Parse BibTeX from the citation download page
+             bibtex_soup = BeautifulSoup(bibtex_response.content, "html.parser")
+             bibtex_link = bibtex_soup.find("a", string="BibTeX")
+             if bibtex_link:
+                 bibtex_download_url = f"https://scholar.google.com{bibtex_link['href']}"
+                 bibtex_data = requests.get(bibtex_download_url, headers=headers).text
+                 bibtex_entries.append(bibtex_data)
+             else:
+                 bibtex_entries.append("BibTeX not available")
+        else:
+             bibtex_entries.append("BibTeX not available")
     return {"name": user_name,"title":user_title, "researches": titles,"citations":citations,"Bibtex":bibtex_entries}
 
 # Streamlit app to process the file
