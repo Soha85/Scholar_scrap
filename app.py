@@ -4,7 +4,36 @@ from bs4 import BeautifulSoup
 import streamlit as st
 st.set_page_config(layout="wide")
 
+def generate_bibtex_from_scraped_data(title, authors, publication_details):
+    """
+    Generate a basic BibTeX entry from scraped research details.
+    :param title: Title of the research paper.
+    :param authors: List of authors (comma-separated string or list).
+    :param publication_details: Publication details (conference, journal, year).
+    :return: A formatted BibTeX entry as a string.
+    """
+    # Generate a unique key for the BibTeX entry
+    if authors:
+        first_author = authors.split(",")[0].strip().replace(" ", "_")
+    else:
+        first_author = "Unknown_Author"
+    bibtex_key = f"{first_author}_{title[:20].replace(' ', '_').replace(':', '').replace(',', '')}"
 
+    # Extract the year from publication details
+    year = "Unknown Year"
+    for word in publication_details.split():
+        if word.isdigit() and len(word) == 4:  # Assume a 4-digit year
+            year = word
+            break
+
+    # Construct the BibTeX entry
+    bibtex_entry = f"""@article{{{bibtex_key},
+      title = {{{title}}},
+      author = {{{authors}}},
+      year = {{{year}}},
+      journal = {{{publication_details}}}
+    }}"""
+    return bibtex_entry
 # Function to scrape user name and research titles from Google Scholar
 def scrape_scholar_details(scholar_url):
     headers = {
@@ -37,22 +66,16 @@ def scrape_scholar_details(scholar_url):
             # Combine text from all <div> elements, including <span>
             citation = " | ".join([cell.get_text(strip=True) for cell in citation_cells])
             citations.append(citation)
-       # Extract BibTeX link
-        bibtex_anchor = row.find("a", class_="gsc_a_at")["href"]
-        bibtex_url = f"https://scholar.google.com{bibtex_anchor}&output=cite&scirp=0"
-        bibtex_response = requests.get(bibtex_url, headers=headers)
-        if bibtex_response.status_code == 200:
-             # Parse BibTeX from the citation download page
-             bibtex_soup = BeautifulSoup(bibtex_response.content, "html.parser")
-             bibtex_link = bibtex_soup.find("a", string="BibTeX")
-             if bibtex_link:
-                 bibtex_download_url = f"https://scholar.google.com{bibtex_link['href']}"
-                 bibtex_data = requests.get(bibtex_download_url, headers=headers).text
-                 bibtex_entries.append(bibtex_data)
-             else:
-                 bibtex_entries.append("BibTeX not available")
-        else:
-             bibtex_entries.append("BibTeX not available")
+           # Extract BibTeX details
+            citation_cells = title_cell.find_all("div", class_="gs_gray")
+            if citation_cells:
+                authors = citation_cells[0].get_text(strip=True) if len(citation_cells) > 0 else "Unknown Authors"
+                publication_details = citation_cells[1].get_text(strip=True) if len(citation_cells) > 1 else "Unknown Publication Details"
+                citations.append(f"{authors} | {publication_details}")
+
+                # Generate BibTeX from scraped data
+                bibtex_entry = generate_bibtex_from_scraped_data(title, authors, publication_details)
+                bibtex_entries.append(bibtex_entry)
     return {"name": user_name,"title":user_title, "researches": titles,"citations":citations,"Bibtex":bibtex_entries}
 
 # Streamlit app to process the file
