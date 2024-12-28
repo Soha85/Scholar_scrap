@@ -27,12 +27,8 @@ def generate_bibtex_from_scraped_data(title, authors, publication_details):
             break
 
     # Construct the BibTeX entry
-    bibtex_entry = f"""@article{{{bibtex_key},
-      title = {{{title}}},
-      author = {{{authors}}},
-      year = {{{year}}},
-      journal = {{{publication_details}}}
-    }}"""
+    bibtex_entry = f"""@article{{{bibtex_key}, title = {{{title}}},
+      author = {{{authors}}}, year = {{{year}}}, journal = {{{publication_details}}}}}"""
     return bibtex_entry
 # Function to scrape user name and research titles from Google Scholar
 def scrape_scholar_details(scholar_url):
